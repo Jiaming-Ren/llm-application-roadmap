@@ -3,60 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jiaming's LLM Hub | 项目枢纽</title>
+    <title>Jiaming's LLM Hub</title>
     <style>
-        :root { --main: #00ff9d; --bg: #0a0a0c; }
-        body { background: var(--bg); color: #c9d1d9; font-family: 'Fira Code', monospace; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .box { background: #161b22; border: 1px solid #30363d; padding: 40px; border-radius: 12px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        h1 { color: var(--main); font-size: 1.4rem; letter-spacing: 2px; margin-bottom: 10px; }
-        .hint { color: #8b949e; font-size: 0.85rem; margin-bottom: 30px; }
-        
-        .node-list { display: grid; gap: 15px; }
-        .node-btn { 
-            padding: 16px; 
-            border-radius: 8px; 
-            text-decoration: none; 
-            font-weight: bold; 
-            display: flex; 
-            justify-content: space-between; 
+        :root {
+            --neon-blue: #00f3ff;
+            --bg-dark: #0a0a0c;
+            --card-bg: #161b22;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #c9d1d9;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            margin: 0;
+            display: flex;
+            justify-content: center;
             align-items: center;
-            transition: 0.3s;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 40px;
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-bottom: 35px;
+        }
+
+        .btn-group {
+            display: grid;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        /* 主按钮：直连原生 GitHub */
+        .btn-primary {
+            background: var(--neon-blue);
+            color: #000;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* 次按钮：打不开时的复制链接功能 */
+        .btn-outline {
+            background: transparent;
+            color: #8b949e;
             border: 1px solid #30363d;
         }
-        
-        /* 推荐节点：极速秒开 */
-        .stable { background: rgba(0, 255, 157, 0.1); color: var(--main); border-color: var(--main); }
-        .stable:hover { background: var(--main); color: #000; box-shadow: 0 0 20px rgba(0, 255, 157, 0.3); }
-        
-        /* 原生节点 */
-        .origin { background: transparent; color: #fff; }
-        .origin:hover { background: #30363d; }
 
-        .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); }
+        .btn-outline:hover {
+            border-color: #8b949e;
+            color: #fff;
+        }
+
+        /* 状态提示 */
+        .status-text {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: #444;
+            min-height: 18px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h1>PROJECT NODES</h1>
-        <p class="hint">当前域名 rjmcode.xyz 已启用全链路加速</p >
+    <div class="container">
+        <h1>Jiaming's LLM Hub</h1>
+        <div class="subtitle">大语言模型应用开发路线图与项目库</div>
 
-        <div class="node-list">
-            <a href=" " class="node-btn stable" target="_blank">
-                <span>🚀 国内极速节点</span>
-                <span class="tag">RECOMMENDED</span>
+        <div class="btn-group">
+            <a href=" " class="btn btn-primary" target="_blank">
+                🌐 访问 GitHub 源码仓库
             </a >
 
-            <a href="https://github.com/Jiaming-Ren/llm-application-roadmap" class="node-btn origin" target="_blank">
-                <span>🌐 GitHub 原生节点</span>
-                <span class="tag">GLOBAL</span>
-            </a >
+            <button class="btn btn-outline" onclick="copyRepositoryLink()">
+                🔗 打不开？点击复制完整链接
+            </button>
         </div>
 
-        <div style="margin-top: 30px; font-size: 0.75rem; color: #444;">
-            SYSTEM STATUS: <span style="color: var(--main);">HEALTHY</span>
-        </div>
+        <div class="status-text" id="statusMessage">HOST: rjmcode.xyz</div>
     </div>
 
+    <script>
+        function copyRepositoryLink() {
+            const repoUrl = 'https://github.com/Jiaming-Ren/llm-application-roadmap';
+            
+            navigator.clipboard.writeText(repoUrl).then(() => {
+                const status = document.getElementById('statusMessage');
+                status.innerText = '✅ 链接已复制！可粘贴至浏览器或加速工具打开';
+                status.style.color = '#00ff9d';
+                
+                // 3秒后恢复默认状态
+                setTimeout(() => {
+                    status.innerText = 'HOST: rjmcode.xyz';
+                    status.style.color = '#444';
+                }, 3000);
+            }).catch(() => {
+                // 浏览器权限不支持时的兼容处理
+                alert('链接为: ' + repoUrl + ' \n请手动复制此链接打开。');
+            });
+        }
+    </script>
 </body>
 </html>
