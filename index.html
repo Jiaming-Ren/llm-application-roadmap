@@ -30,14 +30,35 @@
             border: 1px solid #e1e4e6;
         }
         code {
-            background-color: #rgba(27,31,35,.05);
+            background-color: rgba(27,31,35,.05);
             padding: .2em .4em;
             border-radius: 3px;
             font-family: monospace;
         }
+        .btn-github {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .btn-github a {
+            color: #0366d6;
+            text-decoration: none;
+            font-weight: bold;
+            border: 1px solid #0366d6;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .btn-github a:hover {
+            background: #0366d6;
+            color: white;
+        }
     </style>
 </head>
 <body>
+
+    <div class="btn-github">
+        <a href=" " target="_blank">🐱 查看 GitHub 源码仓库 →</a >
+    </div>
 
     <h1>大模型（LLM）应用开发路线图</h1>
     <p>欢迎来到我的技术实践空间！这里记录了我从 Python 基础出发，逐步走向大模型应用开发的完整历程。</p >
@@ -53,13 +74,13 @@
         <p>学习如何对接主流大模型接口，探索高效的 Prompt 撰写技巧与上下文管理。</p >
     </div>
 
-    <div class="card">
-        <strong>第三阶段：LLM 应用框架实战</strong>
-        <p>后续计划深入研究 LangChain、LlamaIndex 等框架，开发具有记忆力和检索能力的智能体（Agent）。</p >
+    <h2>🔬 本地 API 实验日志（控制台模拟）</h2>
+    <div class="card" style="background-color: #1e1e1e; color: #d4d4d4; font-family: monospace; padding: 15px; border-radius: 6px; line-height: 1.8;">
+        <span style="color: #6a9955;"># 正在本地配置大模型开发环境...</span><br>
+        <span style="color: #6a9955;"># hello_llm.py 已成功初始化</span><br>
+        <span style="color: #569cd6;"> rjmcode.xyz$</span> python hello_llm.py<br>
+        <span style="color: #b5cea8;">[系统状态]</span> 环境检测通过，等待填入 API Key 激活核心调用...
     </div>
-
-    <h2>💻 当前项目进展</h2>
-    <p>我的第一个测试脚本 <code>hello_llm.py</code> 已经成功创建并提交入库。接下来，我将在这里直接展示编写好的大模型对话界面！</p >
 
 </body>
 </html>
