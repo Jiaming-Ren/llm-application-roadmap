@@ -3,154 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jiaming's LLM Hub</title>
+    <title>Jiaming's LLM Hub | 稳定版</title>
     <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-purple: #bc13fe;
-            --bg-dark: #050505;
-            --card-bg: rgba(23, 23, 27, 0.8);
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: #e0e0e0;
-            font-family: 'Fira Code', 'Cascadia Code', monospace;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        /* 动态背景背景：赛博空间感 */
-        body::before {
-            content: "";
-            position: absolute;
-            width: 200%; height: 200%;
-            background: linear-gradient(45deg, #0f0f0f 25%, #1a1a1a 50%, #0f0f0f 75%);
-            animation: move-bg 20s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes move-bg {
-            0% { transform: translate(-25%, -25%); }
-            100% { transform: translate(0, 0); }
-        }
-
-        .glass-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            width: 90%;
-            max-width: 600px;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
-        }
-
-        .tagline {
-            font-size: 0.9rem;
-            color: #888;
-            margin: 15px 0 40px;
-        }
-
-        .btn-stack {
-            display: grid;
-            gap: 20px;
-        }
-
-        /* 极客风格按钮 */
-        .cypher-btn {
-            position: relative;
-            padding: 18px;
-            border: 1px solid var(--neon-blue);
-            background: transparent;
-            color: var(--neon-blue);
-            text-transform: uppercase;
-            font-weight: bold;
-            cursor: pointer;
-            overflow: hidden;
-            transition: 0.3s;
-            text-decoration: none;
-            display: block;
-        }
-
-        .cypher-btn:hover {
-            background: var(--neon-blue);
-            color: #000;
-            box-shadow: 0 0 20px var(--neon-blue);
-        }
-
-        .cypher-btn.secondary {
-            border-color: var(--neon-purple);
-            color: var(--neon-purple);
-        }
-
-        .cypher-btn.secondary:hover {
-            background: var(--neon-purple);
-            color: #fff;
-            box-shadow: 0 0 20px var(--neon-purple);
-        }
-
-        /* 底部状态栏 */
-        .status-bar {
-            margin-top: 40px;
-            font-size: 0.8rem;
-            color: #444;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .blink { animation: blinker 1s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
+        :root { --neon-blue: #00f3ff; --neon-green: #39ff14; --bg: #050505; }
+        body { background: var(--bg); color: #fff; font-family: monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .panel { background: rgba(20, 20, 25, 0.9); border: 1px solid #333; padding: 40px; border-radius: 15px; width: 90%; max-width: 500px; text-align: center; }
+        h1 { font-size: 1.5rem; letter-spacing: 2px; color: var(--neon-blue); margin-bottom: 30px; }
+        .btn-stack { display: grid; gap: 15px; }
+        .btn { padding: 15px; border: 1px solid var(--neon-blue); color: var(--neon-blue); text-decoration: none; transition: 0.3s; cursor: pointer; background: transparent; font-weight: bold; }
+        .btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+        .btn.gitee { border-color: var(--neon-green); color: var(--neon-green); }
+        .btn.gitee:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 20px var(--neon-green); }
+        .copy-hint { margin-top: 20px; font-size: 0.8rem; color: #666; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="glass-panel">
-        <h1>Jiaming's LLM HUB</h1>
-        <div class="tagline">构建大语言模型应用的未来 | <span class="blink">●</span> 系统在线</div>
-
+    <div class="panel">
+        <h1>PROJECT CONTROL CENTER</h1>
+        
         <div class="btn-stack">
-            <a href=" " onclick="jump('github')" class="cypher-btn">
-                [ 主节点 ] GitHub 源码库
+            <a href=" " class="btn" target="_blank">
+                [ 节点 A ] GitHub 官方库
             </a >
 
-            <a href="javascript:void(0)" onclick="jump('fast')" class="cypher-btn secondary">
-                [ 加速节点 ] 极速镜像访问
+            <a href="https://gitee.com/Jiaming-Ren/llm-application-roadmap" class="btn gitee" target="_blank">
+                [ 节点 B ] Gitee 国内加速 (推荐)
             </a >
+
+            <button class="btn" style="border-color: #fff; color: #fff;" onclick="copyLink()">
+                [ 节点 C ] 复制仓库地址 (兜底)
+            </button>
         </div>
 
-        <div class="status-bar">
-            <span>LOC: rjmcode.xyz</span>
-            <span>OS: LLM_DEV_ENV_V1.0</span>
-        </div>
+        <div class="copy-hint" id="statusText">系统状态: 待命...</div>
     </div>
 
     <script>
-        function jump(type) {
-            const repo = 'https://github.com/Jiaming-Ren/llm-application-roadmap';
-            
-            if (type === 'github') {
-                window.location.href = repo;
-            } else {
-                // 这里换成目前国内最稳定的加速前缀，避开超时的 ghproxy
-                window.location.href = 'https://ghp.ci/' + repo;
-            }
+        function copyLink() {
+            const link = 'https://github.com/Jiaming-Ren/llm-application-roadmap';
+            navigator.clipboard.writeText(link).then(() => {
+                const status = document.getElementById('statusText');
+                status.innerText = '✅ 地址已成功复制到剪贴板！';
+                status.style.color = '#39ff14';
+                setTimeout(() => {
+                    status.innerText = '系统状态: 待命...';
+                    status.style.color = '#666';
+                }, 2000);
+            });
         }
     </script>
 </body>
