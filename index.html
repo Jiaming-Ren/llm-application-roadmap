@@ -5,79 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM 应用路线图与实践记录</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
+        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
+        h1 { color: #24292e; border-bottom: 2px solid #eaecef; }
+        .card { background: #f6f8fa; border-radius: 6px; padding: 15px; margin-bottom: 15px; border: 1px solid #e1e4e6; }
+        .btn-github { text-align: center; margin: 30px 0; }
+        /* 变为醒目的蓝色，看到变蓝即代表最新代码生效 */
+        .btn-github a { 
+            color: white !important; 
+            background-color: #007bff !important; 
+            text-decoration: none !important; 
+            font-weight: bold; 
+            padding: 15px 30px; 
+            border-radius: 50px; 
+            display: inline-block; 
+            font-size: 1.1em;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        h1 {
-            color: #24292e;
-            border-bottom: 2px solid #eaecef;
-            padding-bottom: 10px;
-            margin-top: 10px;
-        }
-        h2 {
-            color: #0366d6;
-            margin-top: 30px;
-        }
-        .card {
-            background: #f6f8fa;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 1px solid #e1e4e6;
-        }
-        .btn-github {
-            text-align: right;
-            margin-bottom: 20px;
-            margin-top: 10px;
-        }
-        .btn-github a {
-            color: white !important;
-            background-color: #24292e !important;
-            text-decoration: none !important;
-            font-weight: bold;
-            border: 1px solid #24292e;
-            padding: 10px 20px;
-            border-radius: 6px;
-            display: inline-block;
-            transition: all 0.2s;
-        }
-        .btn-github a:hover {
-            background-color: #0366d6 !important;
-            border-color: #0366d6 !important;
-        }
+        .btn-github a:hover { background-color: #0056b3 !important; }
     </style>
 </head>
 <body>
 
     <div class="btn-github">
-        <a href=" " target="_blank">🐱 查看 GitHub 源码仓库 →</a >
+        <a href=" " target="_blank">🚀 点击进入 GitHub 源码库</a >
     </div>
 
     <h1>大模型（LLM）应用开发路线图</h1>
-    <p>欢迎来到我的技术实践空间！这里记录了我从 Python 基础出发，逐步走向大模型应用开发的完整历程。</p >
-
-    <h2>📌 核心学习路线</h2>
-    <div class="card">
-        <strong>第一阶段：Python 基础夯实</strong>
-        <p>掌握变量、循环、函数以及核心数据结构，为调用大模型 API 打下坚实的代码基础。</p >
-    </div>
+    <p>欢迎来到我的技术实践空间！</p >
 
     <div class="card">
-        <strong>第二阶段：API 调用与提示词工程</strong>
-        <p>学习如何对接主流大模型接口，探索高效的 Prompt 撰写技巧与上下文管理。</p >
+        <strong>✅ 部署测试点：</strong>
+        <p>1. 如果按钮变<strong>蓝色</strong>了，说明你刚才的 Push 成功了。</p >
+        <p>2. 不要直接在编辑器的预览框里点，请在 <strong>Chrome 或 Edge 浏览器</strong>里打开 <u>rjmcode.xyz</u> 再点。</p >
     </div>
 
-    <h2>🔬 本地 API 实验日志（控制台模拟）</h2>
-    <div class="card" style="background-color: #1e1e1e; color: #d4d4d4; font-family: monospace; padding: 15px; border-radius: 6px; line-height: 1.8;">
-        <span style="color: #6a9955;"># 正在本地配置大模型开发环境...</span><br>
-        <span style="color: #6a9955;"># hello_llm.py 已成功初始化</span><br>
-        <span style="color: #569cd6;"> rjmcode.xyz$</span> python hello_llm.py<br>
-        <span style="color: #b5cea8;">[系统状态]</span> 环境检测通过，等待填入 API Key 激活核心调用...
+    <div class="card" style="background-color: #1e1e1e; color: #d4d4d4; font-family: monospace;">
+        rjmcode.xyz$ python hello_llm.py<br>
+        [系统状态] 正在进行最后一次跳转验证...
     </div>
 
 </body>
