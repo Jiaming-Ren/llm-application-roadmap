@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jiaming's LLM Control Center</title>
+    <title>Jiaming's LLM Control Hub</title>
     <style>
         :root {
-            --main-color: #00ff9d; /* 赛博绿 */
-            --accent-color: #00d4ff; /* 科技蓝 */
-            --bg-color: #0a0d14;
-            --card-bg: rgba(22, 27, 34, 0.75);
-            --border-color: rgba(48, 54, 61, 0.8);
+            --main-color: #00ff9d;    /* 赛博绿 */
+            --accent-color: #00d4ff;  /* 科技蓝 */
+            --warning-color: #e1b12c; /* 警告黄 */
+            --bg-color: #060910;
+            --card-bg: rgba(13, 17, 23, 0.75);
+            --border-color: rgba(48, 54, 61, 0.7);
+            --neon-glow: 0 0 20px rgba(0, 255, 157, 0.2);
         }
 
         * { box-sizing: border-box; }
@@ -20,14 +22,16 @@
             color: #c9d1d9;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 40px 20px;
+            padding: 30px 20px;
             display: flex;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             overflow-x: hidden;
             position: relative;
         }
 
-        /* 背景 Canvas 占位 */
+        /* 3D 动态背景 Canvas */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -38,184 +42,185 @@
             pointer-events: none;
         }
 
-        .container {
+        /* 仪表盘主容器 */
+        .dashboard-grid {
             width: 100%;
-            max-width: 750px;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             position: relative;
             z-index: 1;
+            perspective: 1000px; /* 激活 3D 空间透视 */
         }
 
-        /* 3D 浮动动画 */
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        /* 顶级身份名片 */
-        .profile-card {
+        /* 基础 3D 悬浮卡片式样 */
+        .card {
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-            animation: float 6s ease-in-out infinite;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.05);
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.3s;
+            transform-style: preserve-3d;
         }
 
-        .profile-header {
+        .card:hover {
+            border-color: var(--main-color);
+            box-shadow: 0 20px 40px rgba(0, 255, 157, 0.1), inset 0 1px 1px rgba(255,255,255,0.1);
+            transform: translateY(-5px) rotateX(2px) rotateY(2px);
+        }
+
+        /* 排版占位布局 */
+        .col-span-3 { grid-column: span 3; }
+        .col-span-2 { grid-column: span 2; }
+        .col-span-1 { grid-column: span 1; }
+
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .col-span-3, .col-span-2, .col-span-1 { grid-column: span 1; }
+        }
+
+        /* 1. 顶部身份卡片排版 */
+        .profile-section {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
         h1 {
-            color: var(--main-color);
-            font-size: 2rem;
+            color: #fff;
+            font-size: 1.8rem;
             margin: 0;
             font-family: monospace;
-            letter-spacing: 2px;
-            text-shadow: 0 0 15px rgba(0, 255, 157, 0.4);
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, #fff, #8b949e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .title-tag {
-            font-size: 0.85rem;
-            background: rgba(0, 212, 255, 0.15);
-            color: var(--accent-color);
-            padding: 4px 10px;
-            border-radius: 4px;
-            border: 1px solid var(--accent-color);
+        .node-badge {
+            font-size: 0.8rem;
+            background: rgba(0, 255, 157, 0.1);
+            color: var(--main-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 157, 0.3);
             font-family: monospace;
+            box-shadow: var(--neon-glow);
         }
 
-        .contact-grid {
+        .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            width: 100%;
+            margin-top: 15px;
+            border-top: 1px solid rgba(48, 54, 61, 0.5);
+            padding-top: 15px;
             font-family: monospace;
-            font-size: 0.95rem;
         }
 
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #8b949e;
-        }
+        .info-item { color: #8b949e; font-size: 0.9rem; }
+        .info-item span { color: #e6edf3; font-weight: bold; }
 
-        .contact-item span { color: #fff; }
-
-        /* 核心通道按钮 */
-        .action-zone {
-            margin-bottom: 25px;
-        }
-
+        /* 2. 核心通道按钮（3D 质感） */
         .btn-primary {
             display: block;
             width: 100%;
-            background: linear-gradient(135deg, rgba(0, 255, 157, 0.2), rgba(0, 212, 255, 0.2));
+            background: linear-gradient(135deg, rgba(0, 255, 157, 0.15), rgba(0, 212, 255, 0.15));
             border: 1px solid var(--main-color);
             color: var(--main-color);
-            padding: 18px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
             text-decoration: none;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-family: monospace;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 255, 157, 0.15);
+            box-shadow: var(--neon-glow);
+            text-shadow: var(--neon-glow);
+            transform: translateZ(20px); /* 提升 3D 层级 */
         }
 
         .btn-primary:hover {
             background: var(--main-color);
-            color: #000;
-            box-shadow: 0 0 30px rgba(0, 255, 157, 0.5);
-            transform: scale(1.01);
+            color: #060910;
+            box-shadow: 0 0 35px rgba(0, 255, 157, 0.4);
+            transform: translateZ(25px) scale(1.01);
+            text-shadow: none;
         }
 
-        /* 技术看板卡片 */
-        .content-card {
-            background-color: var(--card-bg);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        }
-
-        .content-card h2 {
-            font-size: 1.25rem;
+        /* 3. 项目面板排版 */
+        .card-title {
+            font-size: 1.1rem;
             color: #fff;
             margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             font-family: monospace;
-            border-left: 4px solid var(--accent-color);
-            padding-left: 10px;
-        }
-
-        .project-details {
-            padding-left: 20px;
-            margin: 0;
-        }
-
-        .project-details li {
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-
-        .project-details strong {
-            color: var(--main-color);
-        }
-
-        .tech-tags {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            font-family: monospace;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 14px;
+            background: var(--accent-color);
+            border-radius: 2px;
         }
 
+        .roadmap-list { padding-left: 15px; margin: 0; }
+        .roadmap-list li { margin-bottom: 14px; line-height: 1.6; font-size: 0.95rem; color: #abb2bf; }
+        .roadmap-list strong { color: var(--main-color); }
+
+        /* 4. 技术栈标签排版 */
+        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; }
         .tag {
-            background: #21262d;
-            border: 1px solid #30363d;
+            background: rgba(33, 38, 45, 0.6);
+            border: 1px solid rgba(240, 246, 252, 0.1);
             padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            font-family: monospace;
+            transition: 0.2s;
+        }
+        .tag:hover {
+            border-color: var(--accent-color);
+            color: #fff;
+            background: rgba(0, 212, 255, 0.05);
         }
 
-        /* 底部硬核控制台 */
-        .fallback-box {
-            background-color: rgba(0, 0, 0, 0.85);
+        /* 5. 底部硬核控制台面板 */
+        .console-box {
+            background-color: rgba(0, 0, 0, 0.8);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 20px;
             font-family: monospace;
-            font-size: 0.9rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            font-size: 0.85rem;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
 
-        .console-line {
-            color: var(--accent-color);
-            margin-bottom: 10px;
-        }
-
-        .url-display {
-            background: #161b22;
+        .console-header { color: var(--accent-color); margin-bottom: 12px; display: flex; justify-content: space-between; }
+        .url-bar {
+            background: rgba(22, 27, 34, 0.8);
             padding: 12px;
-            border-radius: 4px;
+            border-radius: 6px;
             word-break: break-all;
             color: #e6edf3;
             margin: 12px 0;
-            border: 1px solid #30363d;
+            border: 1px solid rgba(48, 54, 61, 0.6);
         }
 
+        .action-row { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .copy-btn {
             background: transparent;
             border: 1px solid #8b949e;
@@ -227,11 +232,9 @@
             font-family: monospace;
             transition: 0.2s;
         }
-
         .copy-btn:hover {
             border-color: #fff;
             color: #fff;
-            box-shadow: 0 0 10px rgba(255,255,255,0.2);
         }
     </style>
 </head>
@@ -239,144 +242,166 @@
 
     <canvas id="bg-canvas"></canvas>
 
-    <div class="container">
-        <div class="profile-card">
-            <div class="profile-header">
-                <div>
-                    <h1>任嘉明 (Jiaming Ren)</h1>
-                    <div style="color: #8b949e; font-size: 0.9rem; margin-top: 5px;">CORE TECHNOLOGY DEPLOYMENT CENTER</div>
-                </div>
-                <div class="title-tag">LLM_DEV_NODE</div>
+    <div class="dashboard-grid">
+        
+        <div class="card col-span-3 profile-section">
+            <div style="flex: 1;">
+                <h1>任嘉明 // Jiaming Ren</h1>
+                <div style="color: #6e7681; font-size: 0.85rem; font-family: monospace; margin-top: 4px;">SYSTEM_ARCHITECTURE: LLM_COGNITIVE_HUB</div>
             </div>
-            <div class="contact-grid">
-                <div class="contact-item">📧 邮箱: <span>rjm20060103@gmail.com</span></div>
-                <div class="contact-item">📱 电话: <span>13279179103</span></div>
-                <div class="contact-item">📍 状态: <span style="color: var(--main-color);">ACTIVE_READY</span></div>
+            <div class="node-badge">NODE_STATUS: ONLINE</div>
+            
+            <div class="info-grid">
+                <div class="info-item">📬 EMAIL: <span>rjm20060103@gmail.com</span></div>
+                <div class="info-item">📱 PHONE: <span>13279179103</span></div>
+                <div class="info-item">📡 HOST: <span style="color: var(--accent-color);">rjmcode.xyz</span></div>
             </div>
         </div>
 
-        <div class="action-zone">
+        <div class="action-zone col-span-3">
             <a href=" " class="btn-primary" onclick="smartRedirect()">
-                ⚡ INITIALize COGNITIVE TUNNEL (访问 GitHub 仓库) →
+                🚀 RUN_COGNITIVE_TUNNEL (直连 GitHub 源码仓库) →
             </a >
         </div>
 
-        <div class="content-card">
-            <h2>// 核心项目：LLM Application Roadmap</h2>
-            <ul class="project-details">
-                <li><strong>Phase 1 // 知识库检索优化：</strong> 基于 LangChain / LlamaIndex 框架搭建 RAG 系统，优化本地知识向量化与召回精度。</li>
-                <li><strong>Phase 2 // Agent 智能体构建：</strong> 设计具备 Tool-using 与 ReAct 推理逻辑的多步执行智能体。</li>
-                <li><strong>Phase 3 // 生产级接口发布：</strong> 整合 FastAPI 后端，实现流式传输与多对话高并发管理。</li>
+        <div class="card col-span-2">
+            <div class="card-title">CORE_PROJECT // LLM Application Roadmap</div>
+            <ul class="roadmap-list">
+                <li><strong>Phase 01 / 知识库检索优化：</strong> 基于 LangChain / LlamaIndex 搭建高性能 RAG 系统，深度优化本地多模态数据向量化与多级召回精度。</li>
+                <li><strong>Phase 02 / Agent 智能体构建：</strong> 部署具备多工具调用 (Tool-using) 与 ReAct 推理逻辑的自主多智能体协同网络。</li>
+                <li><strong>Phase 03 / 生产级高并发发布：</strong> 整合 FastAPI 异步后端架构，完美实现流式传输 (Streaming) 与企业级对话状态持久化。</li>
             </ul>
         </div>
 
-        <div class="content-card">
-            <h2>// 现已激活的技术栈</h2>
-            <div class="tech-tags">
-                <div class="tag" style="color: #ff9f43;">Python</div>
-                <div class="tag" style="color: var(--main-color);">LangChain</div>
-                <div class="tag" style="color: var(--accent-color);">FastAPI</div>
-                <div class="tag" style="color: #a55eea;">VectorDB</div>
-                <div class="tag" style="color: #ff5e57;">Docker</div>
-                <div class="tag" style="color: #00d2d3;">Git Actions</div>
+        <div class="card col-span-1" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div class="card-title">ACTIVATED_STACK</div>
+                <div class="tag-container">
+                    <div class="tag" style="color: #ff9f43;">Python</div>
+                    <div class="tag" style="color: var(--main-color);">LangChain</div>
+                    <div class="tag" style="color: var(--accent-color);">FastAPI</div>
+                    <div class="tag" style="color: #a55eea;">VectorDB</div>
+                    <div class="tag" style="color: #ff5e57;">Docker</div>
+                    <div class="tag" style="color: #00d2d3;">Git_Pages</div>
+                </div>
+            </div>
+            <div style="font-family: monospace; font-size: 0.75rem; color: #484f58; margin-top: 15px; border-top: 1px solid rgba(48, 54, 61, 0.3); padding-top: 10px;">
+                COMPILER: V3.8.1_RELEASE
             </div>
         </div>
 
-        <div class="fallback-box">
-            <div class="console-line">jiaming@rjmcode.xyz:~$ ./check_network.sh</div>
-            <div id="networkStatus" style="color: var(--main-color); margin-bottom: 15px;">[SYSTEM] 智能网络穿透及 3D 矩阵空间已安全部署。</div>
-            <div style="color: #8b949e; margin-bottom: 10px;">原始开源仓库凭证：</div>
+        <div class="console-box col-span-3">
+            <div class="console-header">
+                <span>jiaming@rjmcode.xyz:~$ ./check_network.sh</span>
+                <span id="networkTag" style="color: var(--main-color);">[READY]</span>
+            </div>
+            <div id="networkStatus" style="color: #8b949e;">[SYSTEM] 智能穿透链路、数据看板及空间 3D 渲染引擎已安全部署完毕。</div>
             
-            <div class="url-display" id="repoUrl">https://github.com/Jiaming-Ren/llm-application-roadmap</div>
+            <div class="url-bar" id="repoUrl">https://github.com/Jiaming-Ren/llm-application-roadmap</div>
             
-            <button class="copy-btn" onclick="copyRepo()">📋 一键复制仓库地址</button>
-            <span id="copyStatus" style="margin-left: 10px; font-size: 0.85rem; color: var(--main-color);"></span>
+            <div class="action-row">
+                <button class="copy-btn" onclick="copyRepo()">📋 一键复制仓库凭证</button>
+                <span id="copyStatus" style="font-size: 0.85rem; color: var(--main-color); font-weight: bold;"></span>
+            </div>
         </div>
+
     </div>
 
     <script>
-        // --- 纯代码原生 3D 粒子背景引擎 ---
+        // --- 纯代码高级 3D 空间粒子流星背景引擎 ---
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
 
         let width = canvas.width = window.innerWidth;
         let height = canvas.height = window.innerHeight;
 
-        const numParticles = 60;
+        const numParticles = 80;
         const particles = [];
+        let mouseX = 0, mouseY = 0;
 
         for (let i = 0; i < numParticles; i++) {
             particles.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                z: Math.random() * width, // 深度模拟
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5
+                z: Math.random() * width, // 引入 Z 轴深度模拟
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4
             });
         }
 
-        function drawBackground() {
-            ctx.fillStyle = '#0a0d14';
+        // 监听鼠标移动，制造 3D 视差效果
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - width / 2) * 0.05;
+            mouseY = (e.clientY - height / 2) * 0.05;
+        });
+
+        function render3DEnv() {
+            ctx.fillStyle = '#060910';
             ctx.fillRect(0, 0, width, height);
 
-            // 绘制科幻科技线格
-            ctx.strokeStyle = 'rgba(0, 212, 255, 0.03)';
+            // 绘制带有鼠标视差的赛博数码网络格格
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.025)';
             ctx.lineWidth = 1;
-            for (let i = 0; i < width; i += 60) {
+            let offsetX = mouseX * 0.2;
+            let offsetY = mouseY * 0.2;
+            for (let i = offsetX % 70; i < width; i += 70) {
                 ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke();
             }
-            for (let i = 0; i < height; i += 60) {
+            for (let i = offsetY % 70; i < height; i += 70) {
                 ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(width, i); ctx.stroke();
             }
 
-            // 渲染 3D 空间粒子
+            // 投射 3D 粒子深度
             for (let i = 0; i < numParticles; i++) {
                 let p = particles[i];
-                
                 p.x += p.vx;
                 p.y += p.vy;
 
                 if (p.x < 0 || p.x > width) p.vx *= -1;
                 if (p.y < 0 || p.y > height) p.vy *= -1;
 
-                // 投影映射，创造 3D 视差深度感
-                let scale = 300 / (300 + p.z); 
-                let x2d = (p.x - width / 2) * scale + width / 2;
-                let y2d = (p.y - height / 2) * scale + height / 2;
-                let r = Math.abs(2 * scale);
+                // 3D 投影核心变换公式
+                let scale = 400 / (400 + p.z);
+                let x2d = (p.x - width / 2 + mouseX) * scale + width / 2;
+                let y2d = (p.y - height / 2 + mouseY) * scale + height / 2;
+                let r = Math.abs(2.2 * scale);
 
-                ctx.fillStyle = i % 2 === 0 ? 'rgba(0, 255, 157, 0.15)' : 'rgba(0, 212, 255, 0.15)';
+                ctx.fillStyle = i % 3 === 0 ? 'rgba(0, 255, 157, 0.2)' : 'rgba(0, 212, 255, 0.15)';
                 ctx.beginPath();
-                ctx.arc(x2d, y2d, r + 1, 0, Math.PI * 2);
+                ctx.arc(x2d, y2d, r, 0, Math.PI * 2);
                 ctx.fill();
             }
-            requestAnimationFrame(drawBackground);
+            requestAnimationFrame(render3DEnv);
         }
 
         window.addEventListener('resize', () => {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
         });
-        
-        drawBackground();
+        render3DEnv();
 
         // --- 核心网络跳转与中继机制 ---
         function smartRedirect() {
             const rawUrl = 'https://github.com/Jiaming-Ren/llm-application-roadmap';
             const statusBox = document.getElementById('networkStatus');
+            const tagBox = document.getElementById('networkTag');
             
-            statusBox.innerHTML = "[CONNECTING] 正在发起 GitHub 骨干网直连握手...";
-            statusBox.style.color = "#00d4ff";
+            statusBox.innerHTML = "[CONNECTING] 正在向 GitHub 发起直连网络握手...";
+            statusBox.style.color = "var(--accent-color)";
+            tagBox.innerHTML = "[CONNECT]";
+            tagBox.style.color = "var(--accent-color)";
 
-            // 尝试直连新开窗口
+            // 尝试新页面直连
             window.open(rawUrl, '_blank');
 
-            // 1.5秒网络拦截动态监测与中继接管
+            // 智能反拦截与 Google 骨干中继无缝接管机制
             setTimeout(() => {
-                statusBox.innerHTML = "[TUNNEL_ACTIVE] 检测到原生环境网络延迟。已无缝触发 Google 全球中继代理穿透链路。";
-                statusBox.style.color = "#e1b12c";
+                statusBox.innerHTML = "[TUNNEL_ACTIVE] 检测到原生环境握手拦截。已触发 Google 全球翻译中继穿透链路协助访问。";
+                statusBox.style.color = "var(--warning-color)";
+                tagBox.innerHTML = "[TUNNEL]";
+                tagBox.style.color = "var(--warning-color)";
                 
-                // 使用高度可用、国内解析健康的谷歌骨干中继，确保完美开箱访问
+                // 接管当前视窗强制中继转换，百分百过墙展现源码
                 window.location.href = 'https://github-com.translate.goog/Jiaming-Ren/llm-application-roadmap?_x_tr_sl=en&_x_tr_tl=zh-CN';
             }, 1500);
         }
@@ -390,7 +415,7 @@
             document.body.removeChild(el);
 
             const status = document.getElementById('copyStatus');
-            status.innerText = "已成功复制到剪贴板！";
+            status.innerText = "✅ 已成功抓取并复制到剪贴板！";
             setTimeout(() => { status.innerText = ""; }, 2500);
         }
     </script>
