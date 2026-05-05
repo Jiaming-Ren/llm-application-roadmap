@@ -17,6 +17,7 @@
             color: #24292e;
             border-bottom: 2px solid #eaecef;
             padding-bottom: 10px;
+            margin-top: 10px;
         }
         h2 {
             color: #0366d6;
@@ -35,22 +36,26 @@
             border-radius: 3px;
             font-family: monospace;
         }
+        /* 按钮样式优化 */
         .btn-github {
             text-align: right;
             margin-bottom: 20px;
+            margin-top: 10px;
         }
         .btn-github a {
-            color: #0366d6;
+            color: white;
+            background-color: #24292e;
             text-decoration: none;
             font-weight: bold;
-            border: 1px solid #0366d6;
-            padding: 6px 12px;
-            border-radius: 4px;
-            transition: all 0.3s;
+            border: 1px solid #24292e;
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: inline-block;
+            transition: background-color 0.2s;
         }
         .btn-github a:hover {
-            background: #0366d6;
-            color: white;
+            background-color: #0366d6;
+            border-color: #0366d6;
         }
     </style>
 </head>
@@ -64,6 +69,11 @@
     <p>欢迎来到我的技术实践空间！这里记录了我从 Python 基础出发，逐步走向大模型应用开发的完整历程。</p >
 
     <h2>📌 核心学习路线</h2>
+    <div class="card">
+        <strong>第一阶段：Python 基础夯实</strong>
+        <p>掌握变量、循环、函数以及核心数据结构，为调用大模型 API 打下坚实的代码基础。</p >
+    </div>
+
     <div class="card">
         <strong>第一阶段：Python 基础夯实</strong>
         <p>掌握变量、循环、函数以及核心数据结构，为调用大模型 API 打下坚实的代码基础。</p >
