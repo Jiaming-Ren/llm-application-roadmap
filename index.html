@@ -80,7 +80,7 @@
             color: var(--main-color);
         }
 
-        /* 原生跳转跳转区 */
+        /* 原生跳转区 */
         .action-zone {
             margin-bottom: 25px;
         }
@@ -160,7 +160,10 @@
         </header>
 
         <div class="action-zone">
-            <a href=" " class="btn-primary" target="_blank">
+            <a href=" " 
+               class="btn-primary" 
+               target="_blank" 
+               onclick="handleTunnelClick()">
                 🌐 访问 GitHub 原生代码仓库 →
             </a >
         </div>
@@ -183,7 +186,7 @@
 
         <div class="fallback-box">
             <div class="console-line">jiaming@rjmcode.xyz:~$ ./check_network.sh</div>
-            <div style="color: #ff7b72; margin-bottom: 15px;">[INFO] 如遇国内网络握手超时，可使用下方凭证。</div>
+            <div id="networkStatus" style="color: #ff7b72; margin-bottom: 15px;">[INFO] 如遇国内网络握手超时，可使用下方凭证。</div>
             <div style="color: #8b949e; margin-bottom: 10px;">备用链接方案：</div>
             
             <div class="url-display" id="repoUrl">https://github.com/Jiaming-Ren/llm-application-roadmap</div>
@@ -194,6 +197,13 @@
     </div>
 
     <script>
+        function handleTunnelClick() {
+            // 当点击主按钮时，下方状态栏无缝打出配合，引导打不开的用户使用复制功能
+            const statusBox = document.getElementById('networkStatus');
+            statusBox.innerHTML = "[REDIRECT] 已尝试在新标签页呼叫 GitHub。若浏览器被拦截或响应超时，请直接点击下方按钮复制链接。";
+            statusBox.style.color = "#e1b12c"; // 变成亮黄色提示
+        }
+
         function copyRepo() {
             const el = document.createElement('textarea');
             el.value = document.getElementById('repoUrl').innerText;
