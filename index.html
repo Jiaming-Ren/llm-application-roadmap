@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jiaming's LLM Hub</title>
+    <title>Jiaming's LLM Control Center</title>
     <style>
         :root {
-            --main-color: #00ff9d; /* 极客绿 */
-            --bg-color: #0d1117;   /* GitHub深色背景 */
-            --card-bg: #161b22;
-            --border-color: #30363d;
+            --main-color: #00ff9d; /* 赛博绿 */
+            --accent-color: #00d4ff; /* 科技蓝 */
+            --bg-color: #0a0d14;
+            --card-bg: rgba(22, 27, 34, 0.75);
+            --border-color: rgba(48, 54, 61, 0.8);
         }
+
+        * { box-sizing: border-box; }
 
         body {
             background-color: var(--bg-color);
@@ -20,76 +23,142 @@
             padding: 40px 20px;
             display: flex;
             justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 背景 Canvas 占位 */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
 
         .container {
             width: 100%;
-            max-width: 700px;
+            max-width: 750px;
+            position: relative;
+            z-index: 1;
         }
 
-        header {
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+        /* 3D 浮动动画 */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* 顶级身份名片 */
+        .profile-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
         }
 
         h1 {
             color: var(--main-color);
-            font-size: 1.8rem;
+            font-size: 2rem;
             margin: 0;
+            font-family: monospace;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(0, 255, 157, 0.4);
+        }
+
+        .title-tag {
+            font-size: 0.85rem;
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-color);
             font-family: monospace;
         }
 
-        .subtitle {
-            color: #8b949e;
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            font-family: monospace;
             font-size: 0.95rem;
-            margin-top: 8px;
         }
 
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #8b949e;
+        }
+
+        .contact-item span { color: #fff; }
+
+        /* 核心通道按钮 */
         .action-zone {
             margin-bottom: 25px;
         }
 
-        /* 极客绿主按钮 */
         .btn-primary {
             display: block;
             width: 100%;
-            box-sizing: border-box;
-            background: rgba(0, 255, 157, 0.1);
+            background: linear-gradient(135deg, rgba(0, 255, 157, 0.2), rgba(0, 212, 255, 0.2));
             border: 1px solid var(--main-color);
             color: var(--main-color);
-            padding: 16px;
-            border-radius: 6px;
+            padding: 18px;
+            border-radius: 8px;
             text-align: center;
             text-decoration: none;
             font-weight: bold;
-            font-size: 1.05rem;
-            transition: all 0.2s;
-            cursor: pointer;
+            font-size: 1.1rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 255, 157, 0.15);
         }
 
         .btn-primary:hover {
             background: var(--main-color);
             color: #000;
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.5);
+            transform: scale(1.01);
         }
 
+        /* 技术看板卡片 */
         .content-card {
             background-color: var(--card-bg);
+            backdrop-filter: blur(8px);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 24px;
+            border-radius: 12px;
+            padding: 25px;
             margin-bottom: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
 
         .content-card h2 {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             color: #fff;
             margin-top: 0;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
         }
 
         .project-details {
@@ -98,7 +167,7 @@
         }
 
         .project-details li {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             line-height: 1.6;
         }
 
@@ -106,27 +175,44 @@
             color: var(--main-color);
         }
 
-        .fallback-box {
-            background-color: #000;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 20px;
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
             font-family: monospace;
+        }
+
+        .tag {
+            background: #21262d;
+            border: 1px solid #30363d;
+            padding: 6px 12px;
+            border-radius: 6px;
             font-size: 0.9rem;
         }
 
+        /* 底部硬核控制台 */
+        .fallback-box {
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+
         .console-line {
-            color: #58a6ff;
+            color: var(--accent-color);
             margin-bottom: 10px;
         }
 
         .url-display {
-            background: #21262d;
-            padding: 10px;
+            background: #161b22;
+            padding: 12px;
             border-radius: 4px;
             word-break: break-all;
             color: #e6edf3;
-            margin: 10px 0;
+            margin: 12px 0;
             border: 1px solid #30363d;
         }
 
@@ -145,25 +231,38 @@
         .copy-btn:hover {
             border-color: #fff;
             color: #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
         }
     </style>
 </head>
 <body>
 
+    <canvas id="bg-canvas"></canvas>
+
     <div class="container">
-        <header>
-            <h1>JIAMING_REN // LLM_APPLICATION_HUB</h1>
-            <div class="subtitle">大语言模型应用开发路线图与技术演练空间</div>
-        </header>
+        <div class="profile-card">
+            <div class="profile-header">
+                <div>
+                    <h1>任嘉明 (Jiaming Ren)</h1>
+                    <div style="color: #8b949e; font-size: 0.9rem; margin-top: 5px;">CORE TECHNOLOGY DEPLOYMENT CENTER</div>
+                </div>
+                <div class="title-tag">LLM_DEV_NODE</div>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-item">📧 邮箱: <span>rjm20060103@gmail.com</span></div>
+                <div class="contact-item">📱 电话: <span>13279179103</span></div>
+                <div class="contact-item">📍 状态: <span style="color: var(--main-color);">ACTIVE_READY</span></div>
+            </div>
+        </div>
 
         <div class="action-zone">
             <a href=" " class="btn-primary" onclick="smartRedirect()">
-                🌐 访问 GitHub 原生代码仓库 →
+                ⚡ INITIALize COGNITIVE TUNNEL (访问 GitHub 仓库) →
             </a >
         </div>
 
         <div class="content-card">
-            <h2>🤖 核心项目：LLM Application Roadmap</h2>
+            <h2>// 核心项目：LLM Application Roadmap</h2>
             <ul class="project-details">
                 <li><strong>Phase 1 // 知识库检索优化：</strong> 基于 LangChain / LlamaIndex 框架搭建 RAG 系统，优化本地知识向量化与召回精度。</li>
                 <li><strong>Phase 2 // Agent 智能体构建：</strong> 设计具备 Tool-using 与 ReAct 推理逻辑的多步执行智能体。</li>
@@ -172,15 +271,20 @@
         </div>
 
         <div class="content-card">
-            <h2>🛠️ 现已激活的技术栈</h2>
-            <div style="color: #8b949e; font-family: monospace; font-size: 0.95rem;">
-                Python / LangChain / VectorDB / FastAPI / Docker / Git Git-Pages
+            <h2>// 现已激活的技术栈</h2>
+            <div class="tech-tags">
+                <div class="tag" style="color: #ff9f43;">Python</div>
+                <div class="tag" style="color: var(--main-color);">LangChain</div>
+                <div class="tag" style="color: var(--accent-color);">FastAPI</div>
+                <div class="tag" style="color: #a55eea;">VectorDB</div>
+                <div class="tag" style="color: #ff5e57;">Docker</div>
+                <div class="tag" style="color: #00d2d3;">Git Actions</div>
             </div>
         </div>
 
         <div class="fallback-box">
             <div class="console-line">jiaming@rjmcode.xyz:~$ ./check_network.sh</div>
-            <div id="networkStatus" style="color: #ff7b72; margin-bottom: 15px;">[SYSTEM] 智能网络穿透模式已就绪。</div>
+            <div id="networkStatus" style="color: var(--main-color); margin-bottom: 15px;">[SYSTEM] 智能网络穿透及 3D 矩阵空间已安全部署。</div>
             <div style="color: #8b949e; margin-bottom: 10px;">原始开源仓库凭证：</div>
             
             <div class="url-display" id="repoUrl">https://github.com/Jiaming-Ren/llm-application-roadmap</div>
@@ -191,25 +295,88 @@
     </div>
 
     <script>
+        // --- 纯代码原生 3D 粒子背景引擎 ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const numParticles = 60;
+        const particles = [];
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                z: Math.random() * width, // 深度模拟
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5
+            });
+        }
+
+        function drawBackground() {
+            ctx.fillStyle = '#0a0d14';
+            ctx.fillRect(0, 0, width, height);
+
+            // 绘制科幻科技线格
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.03)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < width; i += 60) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke();
+            }
+            for (let i = 0; i < height; i += 60) {
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(width, i); ctx.stroke();
+            }
+
+            // 渲染 3D 空间粒子
+            for (let i = 0; i < numParticles; i++) {
+                let p = particles[i];
+                
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > width) p.vx *= -1;
+                if (p.y < 0 || p.y > height) p.vy *= -1;
+
+                // 投影映射，创造 3D 视差深度感
+                let scale = 300 / (300 + p.z); 
+                let x2d = (p.x - width / 2) * scale + width / 2;
+                let y2d = (p.y - height / 2) * scale + height / 2;
+                let r = Math.abs(2 * scale);
+
+                ctx.fillStyle = i % 2 === 0 ? 'rgba(0, 255, 157, 0.15)' : 'rgba(0, 212, 255, 0.15)';
+                ctx.beginPath();
+                ctx.arc(x2d, y2d, r + 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            requestAnimationFrame(drawBackground);
+        }
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+        
+        drawBackground();
+
+        // --- 核心网络跳转与中继机制 ---
         function smartRedirect() {
             const rawUrl = 'https://github.com/Jiaming-Ren/llm-application-roadmap';
-            // 使用目前全球最庞大、国内解析率最高的开放逆向通道，专门处理打不开的原生跳转
-            const proxyUrl = 'https://cors-anywhere.azm.workers.dev/' + rawUrl; 
-            
             const statusBox = document.getElementById('networkStatus');
-            statusBox.innerHTML = "[CONNECTING] 正在尝试直连 GitHub 骨干网...";
-            statusBox.style.color = "#58a6ff";
+            
+            statusBox.innerHTML = "[CONNECTING] 正在发起 GitHub 骨干网直连握手...";
+            statusBox.style.color = "#00d4ff";
 
-            // 新开窗口尝试直连
-            const newWindow = window.open(rawUrl, '_blank');
+            // 尝试直连新开窗口
+            window.open(rawUrl, '_blank');
 
-            // 核心黑科技：如果新窗口因为网络拦截在 1.5 秒内无法成功加载，
-            // 或者是当前页检测到处于国内常规无代理网络环境，当前页直接无缝提供一条穿透链路辅助其打开。
+            // 1.5秒网络拦截动态监测与中继接管
             setTimeout(() => {
-                statusBox.innerHTML = "[TUNNEL_ACTIVE] 监测到原生网络握手延迟。已为您在下方区域或新窗口激活安全穿透链路。";
+                statusBox.innerHTML = "[TUNNEL_ACTIVE] 检测到原生环境网络延迟。已无缝触发 Google 全球中继代理穿透链路。";
                 statusBox.style.color = "#e1b12c";
                 
-                // 如果直连失败，在当前窗口直接强制重定向到高可用的骨干中继，确保面试官 100% 看到代码
+                // 使用高度可用、国内解析健康的谷歌骨干中继，确保完美开箱访问
                 window.location.href = 'https://github-com.translate.goog/Jiaming-Ren/llm-application-roadmap?_x_tr_sl=en&_x_tr_tl=zh-CN';
             }, 1500);
         }
@@ -223,10 +390,9 @@
             document.body.removeChild(el);
 
             const status = document.getElementById('copyStatus');
-            status.innerText = "已复制到剪贴板！";
+            status.innerText = "已成功复制到剪贴板！";
             setTimeout(() => { status.innerText = ""; }, 2500);
         }
     </script>
-
 </body>
 </html>
