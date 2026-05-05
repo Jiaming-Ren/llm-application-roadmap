@@ -3,50 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM 应用路线图与实践记录</title>
+    <title>LLM 应用开发路线图与实践</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; background-color: #fafbfc; }
-        h1 { color: #24292e; border-bottom: 2px solid #eaecef; padding-bottom: 10px; margin-top: 30px; }
-        .btn-box { text-align: center; margin: 40px 0; }
-        /* 酷炫黑白程序员按钮 */
-        .btn-git { 
-            color: #fff !important; 
+        /* 全局样式重置与极客风配色 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            line-height: 1.7; 
+            max-width: 850px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+            color: #24292e; 
+            background-color: #f6f8fa; 
+        }
+        
+        h1 { 
+            color: #24292e; 
+            font-size: 2rem;
+            border-bottom: 2px solid #e1e4e6; 
+            padding-bottom: 12px; 
+            margin-top: 20px; 
+        }
+
+        p {
+            color: #586069;
+            font-size: 1.05rem;
+        }
+        
+        /* 按钮区域布局 */
+        .btn-container { 
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 35px 0; 
+        }
+        
+        /* 核心原生黑白按钮 */
+        .btn-primary { 
+            color: #ffffff !important; 
             background-color: #24292e !important; 
             text-decoration: none !important; 
             font-weight: 600; 
-            padding: 14px 32px; 
+            padding: 12px 28px; 
             border-radius: 6px; 
-            display: inline-block; 
-            font-size: 1.1em;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 1rem;
+            border: 1px solid #24292e;
             cursor: pointer;
-            border: none;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
             transition: all 0.2s ease;
         }
-        .btn-git:hover { background-color: #444d56 !important; transform: translateY(-1px); }
-        .card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; border: 1px solid #e1e4e6; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .code-block { background-color: #1e1e1e; color: #d4d4d4; font-family: "Courier New", Courier, monospace; padding: 15px; border-radius: 6px; font-size: 0.95em; }
+        .btn-primary:hover { 
+            background-color: #444d56 !important; 
+            border-color: #444d56;
+            transform: translateY(-1px); 
+        }
+
+        /* 浅色备用按钮 */
+        .btn-secondary { 
+            color: #24292e !important; 
+            background-color: #ffffff !important; 
+            text-decoration: none !important; 
+            font-weight: 600; 
+            padding: 12px 28px; 
+            border-radius: 6px; 
+            font-size: 1rem;
+            border: 1px solid #e1e4e6;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        .btn-secondary:hover { 
+            background-color: #f3f4f6 !important; 
+            border-color: #c9d1d9;
+            transform: translateY(-1px); 
+        }
+        
+        /* 说明卡片 */
+        .status-card { 
+            background: #ffffff; 
+            border-radius: 6px; 
+            padding: 24px; 
+            margin-bottom: 30px; 
+            border: 1px solid #e1e4e6; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02); 
+        }
+        .status-card strong {
+            color: #24292e;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        .status-card ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #444d56;
+        }
+        .status-card li {
+            margin-bottom: 6px;
+        }
+        
+        /* 模拟控制台黑框 */
+        .console-box { 
+            background-color: #1e1e1e; 
+            color: #75beff; 
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace; 
+            padding: 18px; 
+            border-radius: 6px; 
+            font-size: 0.95rem;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .console-text-green { color: #57e389; }
+        .console-text-gray { color: #858585; }
     </style>
 </head>
 <body>
 
     <h1>大模型（LLM）应用开发路线图</h1>
-    <p>欢迎来到我的技术实践空间！当前系统已成功托管至安全网络枢纽。</p >
+    <p>欢迎来到我的技术实践空间！当前系统已通过自定义域名成功部署至云端节点。</p >
 
-    <div class="btn-box">
-        <button class="btn-git" onclick="window.location.href='https://github.com/Jiaming-Ren/llm-application-roadmap'">💻 查看 GitHub 源码仓库 (原生直连模式)</button>
+    <div class="btn-container">
+        <button class="btn-primary" onclick="navigateTo('github')">
+            💻 查看 GitHub 源码仓库
+        </button>
+        
+        <button class="btn-secondary" onclick="navigateTo('backup')">
+            🚀 备用加速访问通道
+        </button>
     </div>
 
-    <div class="card">
-        <strong>⚡ 系统内核升级：</strong>
-        <p>1. 已启用原生 <code>window.location</code> 引擎，点击后将在当前标签页直接切入主站，100% 免疫任何浏览器的拦截机制。</p >
+    <div class="status-card">
+        <strong>⚡ 系统环境与链路监测：</strong>
+        <ul>
+            <li><strong>自定义域名绑定：</strong> 成功识别 <code>rjmcode.xyz</code> 根域名。</li>
+            <li><strong>路由重定向：</strong> 已升级为原生 <code>window.location</code> 引擎，彻底免疫浏览器弹窗拦截。</li>
+            <li><strong>源码同步机制：</strong> 本地通过 GitHub Desktop 提交代码后，云端将在 1 分钟内全局刷新。</li>
+        </ul>
     </div>
 
-    <div class="code-block">
-        rjmcode.xyz$ python hello_llm.py<br>
-        [核心逻辑] 正在重构全局点击路由...
+    <div class="console-box">
+        <span class="console-text-gray">rjmcode.xyz$</span> python hello_llm.py<br>
+        <span class="console-text-green">[核心逻辑] 基础网络全链路调校完成，准备注入大模型应用开发规划...</span>
     </div>
+
+    <script>
+        /**
+         * 核心安全跳转函数
+         * 使用 window.location.href 在当前窗口直接切换，完美绕过任何浏览器的恶意弹窗拦截策略
+         */
+        function navigateTo(target) {
+            if (target === 'github') {
+                // 你的原生 GitHub 仓库地址
+                window.location.href = 'https://github.com/Jiaming-Ren/llm-application-roadmap';
+            } else if (target === 'backup') {
+                // 备用通道：国内裸连更顺畅。未来如果你注册了 Gitee 导入了项目，可以把下面这个网址换成你的 Gitee 链接
+                window.location.href = 'https://cn.bing.com/search?q=GitHub+Jiaming-Ren';
+            }
+        }
+    </script>
 
 </body>
 </html>
