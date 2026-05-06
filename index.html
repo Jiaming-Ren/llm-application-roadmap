@@ -3,49 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jiaming's LLM Control Center v3D</title>
+    <title>Jiaming's LLM Control Center v4.0</title>
     <style>
         :root {
-            --main-color: #00ff9d; --accent-color: #00d4ff; --warning-color: #e1b12c; --bg-color: #0d1117;
-            --card-bg: rgba(22, 27, 34, 0.7); --border-color: rgba(48, 54, 61, 0.8);
+            --main-color: #00ff9d; --accent-color: #00d4ff; --warning-color: #e1b12c; --danger-color: #ff4757;
+            --bg-color: #0d1117; --card-bg: rgba(22, 27, 34, 0.65); --border-color: rgba(48, 54, 61, 0.8);
             --neon-glow: 0 0 20px rgba(0, 255, 157, 0.3); --font-mono: 'Fira Code', 'Cascadia Code', monospace;
         }
+
         * { box-sizing: border-box; }
-        body { background-color: var(--bg-color); color: #c9d1d9; font-family: -apple-system, sans-serif; margin: 0; padding: 40px 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; position: relative; }
+
+        body {
+            background-color: var(--bg-color); color: #c9d1d9; font-family: -apple-system, sans-serif;
+            margin: 0; padding: 40px 20px; display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow-x: hidden; position: relative;
+        }
+
+        /* 1. 新增：全息 CRT 扫描线图层 */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px; pointer-events: none; opacity: 0.6;
+        }
+
+        /* 2. 新增：开机自检终端屏幕 */
+        #boot-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000;
+            z-index: 10000; display: flex; flex-direction: column; justify-content: center;
+            padding-left: 10%; font-family: var(--font-mono); color: var(--main-color);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .boot-line { margin: 5px 0; text-shadow: 0 0 5px var(--main-color); font-size: 1.1rem; }
+        .boot-cursor { display: inline-block; width: 10px; height: 1.1rem; background: var(--main-color); animation: blink 1s step-end infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* 全局 3D Canvas */
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-        .dashboard-grid { width: 100%; max-width: 1000px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; position: relative; z-index: 1; perspective: 2000px; }
-        @keyframes float { 0%, 100% { transform: translateY(0px) rotateX(2px) rotateY(2px); } 50% { transform: translateY(-15px) rotateX(-2px) rotateY(-2px); } }
-        .card { background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); transition: all 0.4s; transform-style: preserve-3d; animation: float 8s ease-in-out infinite; }
-        .card:hover { border-color: var(--main-color); box-shadow: 0 30px 70px rgba(0, 255, 157, 0.2); animation-play-state: paused; }
+
+        /* 仪表盘网格 */
+        .dashboard-grid { width: 100%; max-width: 1000px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; position: relative; z-index: 1; perspective: 2000px; opacity: 0; animation: fadeInUI 1s ease-out 2.5s forwards; }
+        @keyframes fadeInUI { to { opacity: 1; } }
+
+        /* 悬浮卡片式样 */
+        @keyframes float { 0%, 100% { transform: translateY(0px) rotateX(2px) rotateY(2px); } 50% { transform: translateY(-12px) rotateX(-2px) rotateY(-2px); } }
+        .card { background: var(--card-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); transition: all 0.4s; transform-style: preserve-3d; animation: float 8s ease-in-out infinite; }
+        .card:hover { border-color: var(--accent-color); box-shadow: 0 30px 70px rgba(0, 212, 255, 0.2); animation-play-state: paused; }
         .col-span-3 { grid-column: span 3; } .col-span-2 { grid-column: span 2; } .col-span-1 { grid-column: span 1; }
         @media (max-width: 850px) { .dashboard-grid { grid-template-columns: 1fr; } .col-span-3, .col-span-2, .col-span-1 { grid-column: span 1; } }
+
+        /* 模块一：毛玻璃身份卡 */
         .profile-section { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: relative; overflow: hidden; }
-        .profile-section::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMDAiPjwvc3ZnPg==') repeat; animation: rotate 60s linear infinite; opacity: 0.1; }
+        .profile-section::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiMzMDM2M2QiIHN0cm9rZS13aWR0aD0iMC41Ij48Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjgwIi8+PGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSI2MCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iNDAiLz48Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjIwIi8+PC9nPjwvc3ZnPg==') repeat; animation: rotate 60s linear infinite; opacity: 0.15; z-index: 0; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        h1 { color: #fff; font-size: 2.2rem; margin: 0; font-family: var(--font-mono); letter-spacing: 4px; background: linear-gradient(90deg, #fff, #8b949e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .node-badge { font-size: 0.85rem; background: rgba(0, 255, 157, 0.1); color: var(--main-color); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(0, 255, 157, 0.3); font-family: var(--font-mono); box-shadow: var(--neon-glow); }
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; width: 100%; margin-top: 15px; border-top: 1px solid rgba(48, 54, 61, 0.5); padding-top: 20px; font-family: var(--font-mono); }
+        h1 { color: #fff; font-size: 2.2rem; margin: 0; font-family: var(--font-mono); letter-spacing: 4px; background: linear-gradient(90deg, #fff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px rgba(0, 212, 255, 0.3); z-index: 1; position: relative; }
+        .node-badge { font-size: 0.85rem; background: rgba(0, 255, 157, 0.1); color: var(--main-color); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(0, 255, 157, 0.4); font-family: var(--font-mono); box-shadow: var(--neon-glow); z-index: 1; position: relative; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; width: 100%; margin-top: 15px; border-top: 1px solid rgba(48, 54, 61, 0.5); padding-top: 20px; font-family: var(--font-mono); z-index: 1; position: relative; }
         .info-item { color: #8b949e; font-size: 0.95rem; } .info-item span { color: #e6edf3; font-weight: bold; }
-        .btn-primary { display: block; width: 100%; background: linear-gradient(135deg, rgba(0, 255, 157, 0.15), rgba(0, 212, 255, 0.15)); border: 1px solid var(--main-color); color: var(--main-color); padding: 24px; border-radius: 14px; text-align: center; text-decoration: none; font-weight: bold; font-size: 1.2rem; font-family: var(--font-mono); letter-spacing: 3px; transition: all 0.3s; box-shadow: var(--neon-glow); transform: translateZ(40px); }
-        .btn-primary:hover { background: var(--main-color); color: #060910; box-shadow: 0 0 50px rgba(0, 255, 157, 0.6); transform: translateZ(60px) scale(1.02); }
-        .card-title { font-size: 1.2rem; color: #fff; margin: 0 0 20px 0; font-family: var(--font-mono); display: flex; align-items: center; gap: 10px; }
+
+        /* 模块二：3D核心按钮 */
+        .btn-primary { display: block; width: 100%; background: linear-gradient(135deg, rgba(0, 255, 157, 0.1), rgba(0, 212, 255, 0.1)); border: 1px solid var(--main-color); color: var(--main-color); padding: 24px; border-radius: 14px; text-align: center; text-decoration: none; font-weight: bold; font-size: 1.2rem; font-family: var(--font-mono); letter-spacing: 3px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 15px rgba(0,255,157,0.2); transform: translateZ(30px); }
+        .btn-primary:hover { background: rgba(0, 255, 157, 0.2); color: #fff; border-color: #fff; box-shadow: 0 0 40px rgba(0, 255, 157, 0.6); transform: translateZ(50px) scale(1.02); }
+
+        /* 模块三：路线图 */
+        .card-title { font-size: 1.15rem; color: #fff; margin: 0 0 20px 0; font-family: var(--font-mono); display: flex; align-items: center; gap: 10px; }
         .card-title::before { content: ''; display: inline-block; width: 5px; height: 16px; background: var(--accent-color); border-radius: 2px; }
-        .roadmap-list { padding-left: 15px; margin: 0; } .roadmap-list li { margin-bottom: 15px; line-height: 1.7; font-size: 1rem; color: #abb2bf; }
+        .roadmap-list { padding-left: 15px; margin: 0; } .roadmap-list li { margin-bottom: 15px; line-height: 1.7; font-size: 0.95rem; color: #abb2bf; transition: 0.3s; }
+        .roadmap-list li:hover { color: #fff; transform: translateX(5px); }
         .roadmap-list strong { color: var(--main-color); }
-        .topology-card { display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+
+        /* 模块四：引力场拓扑 & RAG注入测试 */
+        .topology-card { display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; cursor: crosshair; }
         #topology-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        .tag-container { display: flex; flex-wrap: wrap; gap: 10px; position: relative; z-index: 1; }
-        .tag { background: rgba(33, 38, 45, 0.8); border: 1px solid rgba(240, 246, 252, 0.1); padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; font-family: var(--font-mono); transition: 0.3s; }
-        .tag:hover { border-color: var(--accent-color); color: #fff; background: rgba(0, 212, 255, 0.1); transform: scale(1.05) translateZ(10px); }
+        .tag-container { display: flex; flex-wrap: wrap; gap: 10px; position: relative; z-index: 1; pointer-events: none; }
+        .tag { background: rgba(33, 38, 45, 0.8); border: 1px solid rgba(240, 246, 252, 0.15); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-family: var(--font-mono); }
+        
         .rag-observability { margin-top: 20px; border-top: 1px solid rgba(48, 54, 61, 0.5); padding-top: 20px; font-family: var(--font-mono); font-size: 0.85rem; position: relative; z-index: 1; }
+        .rag-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        
+        /* 交互按钮：注入压测 */
+        .inject-btn { background: transparent; border: 1px solid var(--warning-color); color: var(--warning-color); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-family: var(--font-mono); font-weight: bold; transition: 0.2s; animation: pulseBtn 2s infinite; pointer-events: auto; }
+        .inject-btn:hover { background: var(--warning-color); color: #000; box-shadow: 0 0 15px rgba(225, 177, 44, 0.6); }
+        @keyframes pulseBtn { 0% { box-shadow: 0 0 0 0 rgba(225,177,44, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(225,177,44, 0); } 100% { box-shadow: 0 0 0 0 rgba(225,177,44, 0); } }
+
         .rag-item { color: #6e7681; display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 8px; }
-        .rag-value { color: var(--main-color); font-weight: bold; }
+        .rag-value { color: var(--main-color); font-weight: bold; transition: color 0.3s; }
         .rag-bar-wrap { height: 4px; background: #21262d; border-radius: 2px; overflow: hidden; grid-column: span 2; margin-top: 2px; }
-        .rag-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-color), var(--main-color)); transition: width 0.3s ease; }
-        .console-box { background-color: rgba(0, 0, 0, 0.85); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; font-family: var(--font-mono); font-size: 0.9rem; box-shadow: inset 0 0 35px rgba(0,0,0,0.8); }
+        .rag-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-color), var(--main-color)); transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s; }
+
+        /* 模块五：控制台 */
+        .console-box { background-color: rgba(0, 0, 0, 0.85); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; font-family: var(--font-mono); font-size: 0.9rem; box-shadow: inset 0 0 35px rgba(0,0,0,0.9); position: relative; }
         .console-header { color: var(--accent-color); margin-bottom: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(48, 54, 61, 0.6); padding-bottom: 10px; }
         #agentConsole { height: 140px; overflow-y: hidden; color: #8b949e; line-height: 1.6; margin-bottom: 12px; }
-        .thought { color: #888; } .action { color: var(--accent-color); font-weight: bold; } .observation { color: var(--warning-color); }
+        .thought { color: #888; } .action { color: var(--accent-color); font-weight: bold; } .observation { color: var(--warning-color); } .alert { color: var(--danger-color); font-weight: bold; text-shadow: 0 0 8px rgba(255, 71, 87, 0.5); }
         .url-bar { background: rgba(22, 27, 34, 0.8); padding: 14px; border-radius: 8px; word-break: break-all; color: #e6edf3; margin: 14px 0; border: 1px solid rgba(48, 54, 61, 0.7); }
         .action-row { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .copy-btn { background: transparent; border: 1px solid #8b949e; color: #8b949e; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: var(--font-mono); transition: 0.2s; }
@@ -53,32 +102,46 @@
     </style>
 </head>
 <body>
+
+    <div class="scanlines"></div>
+
+    <div id="boot-screen">
+        <div id="boot-content"></div>
+        <div class="boot-cursor"></div>
+    </div>
+
     <canvas id="bg-canvas"></canvas>
+
     <div class="dashboard-grid">
         <div class="card col-span-3 profile-section">
             <div style="flex: 1; z-index: 1;">
                 <h1>任嘉明 // Jiaming Ren</h1>
                 <div style="color: #6e7681; font-size: 0.9rem; font-family: var(--font-mono); margin-top: 5px;">LLM Application Developer | Agentic System Architect</div>
             </div>
-            <div class="node-badge">Rjmcode_Node::v3D</div>
+            <div class="node-badge">Rjmcode_Node::v4.0_LIVE</div>
             <div class="info-grid">
                 <div class="info-item">📩 EMAIL: <span>rjm20060103@gmail.com</span></div>
                 <div class="info-item">📱 PHONE: <span>13279179103</span></div>
                 <div class="info-item">📡 HOST: <span style="color: var(--accent-color);">rjmcode.xyz</span></div>
             </div>
         </div>
+
         <div class="action-zone col-span-3">
-            <a href=" " class="btn-primary" onclick="smartRedirect()">🔥 Initialize Cognitive Tunnel (访问 GitHub 源码仓库) →</a >
+            <a href="javascript:void(0)" class="btn-primary" onclick="smartRedirect()">
+                🔥 Initialize Cognitive Tunnel (访问 GitHub 源码仓库) →
+            </a>
         </div>
+
         <div class="card col-span-2">
             <div class="card-title">// CORE_PROJECT // LLM Application Roadmap</div>
             <ul class="roadmap-list">
-                <li><strong>Phase 01 / RAG & 本地向量库：</strong> 搭建工业级 RAG 系统，通过 Parent-Child Chunking 和 Hybrid Search 优化本地多模态数据的检索精度。</li>
-                <li><strong>Phase 02 / Agentic Reasoning 网络：</strong> 部署具备 ReAct 推理、Tool-using 多智能体协作协同工作流。</li>
-                <li><strong>Phase 03 / 异步后端工程化发布：</strong> 整合 FastAPI 高性能异步架构，实现多对话高并发流式传输与状态持久化。</li>
+                <li><strong>Phase 01 / RAG & 本地向量库：</strong> 搭建工业级 RAG 系统，通过 Parent-Child Chunking 和 Hybrid Search 优化多模态数据的检索精度。</li>
+                <li><strong>Phase 02 / Agentic Reasoning 网络：</strong> 部署具备 ReAct 推理、Tool-using（网络/SQL）的多智能体协同工作流。</li>
+                <li><strong>Phase 03 / 异步后端工程化发布：</strong> 整合 FastAPI 异步架构，实现多对话高并发流式传输 (Streaming Response) 与状态持久化。</li>
             </ul>
         </div>
-        <div class="card col-span-1 topology-card">
+
+        <div class="card col-span-1 topology-card" id="techCard">
             <canvas id="topology-canvas"></canvas>
             <div style="position: relative; z-index: 1;">
                 <div class="card-title">// ACTIVATED_STACK</div>
@@ -87,17 +150,23 @@
                     <div class="tag" style="color: #a55eea;">VectorDB</div><div class="tag" style="color: #ff5e57;">Docker</div><div class="tag" style="color: #00d2d3;">Git_Actions</div>
                 </div>
             </div>
+            
             <div class="rag-observability">
-                <div class="rag-item">RAG Hit Rate: <span class="rag-value" id="hitRateValue">92%</span></div>
+                <div class="rag-header">
+                    <span style="color:#fff; font-weight:bold;">// RAG 观测链路</span>
+                    <button class="inject-btn" onclick="injectPressureTest()">⚡ 注入压测</button>
+                </div>
+                <div class="rag-item">Hit Rate: <span class="rag-value" id="hitRateValue">92%</span></div>
                 <div class="rag-bar-wrap"><div class="rag-bar-fill" id="hitRateBar" style="width: 92%;"></div></div>
-                <div class="rag-item">Retrieval Latency: <span class="rag-value" id="latencyValue">180ms</span></div>
+                <div class="rag-item">Latency: <span class="rag-value" id="latencyValue">180ms</span></div>
                 <div class="rag-bar-wrap"><div class="rag-bar-fill" id="latencyBar" style="width: 45%;"></div></div>
             </div>
         </div>
+
         <div class="console-box col-span-3">
             <div class="console-header">
                 <span>jiaming@rjmcode.xyz:~$ ./deploy_agentic_workflow.sh</span>
-                <span id="networkTag" style="color: var(--main-color);">[DEPLOYING]</span>
+                <span id="networkTag" style="color: var(--main-color);">[ONLINE]</span>
             </div>
             <div id="agentConsole"></div>
             <div class="url-bar" id="repoUrl">https://github.com/Jiaming-Ren/llm-application-roadmap</div>
@@ -107,7 +176,41 @@
             </div>
         </div>
     </div>
+
     <script>
+        // --- 核心 1：开机自检动画系统 ---
+        const bootText = [
+            "SYS_INIT: Booting LLM Control Node v4.0...",
+            "KERNEL: Allocating neural tensors... [OK]",
+            "MODULE: Mounting VectorDB (Milvus/Chroma)... [OK]",
+            "MODULE: Loading Agentic Reasoning Engine... [OK]",
+            "NETWORK: Establishing secure GitHub tunnel... [OK]",
+            "AUTH: Biometric scan complete. Welcome, Jiaming_Ren."
+        ];
+        const bootEl = document.getElementById('boot-content');
+        const bootScreen = document.getElementById('boot-screen');
+        let bootLine = 0;
+
+        function runBootSequence() {
+            if (bootLine < bootText.length) {
+                const p = document.createElement('div');
+                p.className = 'boot-line';
+                p.innerText = "> " + bootText[bootLine];
+                bootEl.appendChild(p);
+                bootLine++;
+                setTimeout(runBootSequence, 150 + Math.random() * 200); // 随机打字延迟模拟真实感
+            } else {
+                setTimeout(() => {
+                    bootScreen.style.opacity = '0';
+                    bootScreen.style.transform = 'scale(1.05)'; // 碎裂放大效果
+                    setTimeout(() => { bootScreen.style.display = 'none'; startAgentLog(); }, 800);
+                }, 500);
+            }
+        }
+        window.onload = () => { setTimeout(runBootSequence, 300); };
+
+
+        // --- 核心 2：全局 3D 背景 (保持原有) ---
         const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
         let width = canvas.width = window.innerWidth; let height = canvas.height = window.innerHeight;
         const numParticles = 80; const particles = []; let mouseX = 0, mouseY = 0;
@@ -130,57 +233,119 @@
         }
         render3DEnv();
 
-        const topCanvas = document.getElementById('topology-canvas'); const topCtx = topCanvas.getContext('2d'); const tags = document.querySelectorAll('.topology-card .tag');
+
+        // --- 核心 3：物理引力拓扑网络 (互动升级) ---
+        const topCanvas = document.getElementById('topology-canvas'); const topCtx = topCanvas.getContext('2d');
+        const techCard = document.getElementById('techCard');
+        let cardMouseX = -1000, cardMouseY = -1000;
+
+        // 监听鼠标在卡片内的移动产生引力
+        techCard.addEventListener('mousemove', (e) => {
+            const rect = topCanvas.getBoundingClientRect();
+            cardMouseX = e.clientX - rect.left; cardMouseY = e.clientY - rect.top;
+        });
+        techCard.addEventListener('mouseleave', () => { cardMouseX = -1000; cardMouseY = -1000; });
+
+        // 生成随机虚拟节点
+        const virtNodes = Array.from({length: 12}, () => ({ x: Math.random() * 300, y: Math.random() * 200, originX: 0, originY: 0, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5 }));
+
         function drawTopologyNet() {
             const parent = topCanvas.parentElement; topCanvas.width = parent.offsetWidth; topCanvas.height = parent.offsetHeight;
-            topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height); topCtx.strokeStyle = 'rgba(0, 212, 255, 0.08)'; topCtx.lineWidth = 0.5;
-            const nodes = [];
-            tags.forEach(tag => { const rect = tag.getBoundingClientRect(); const parentRect = parent.getBoundingClientRect(); nodes.push({ x: (rect.left + rect.width / 2) - parentRect.left, y: (rect.top + rect.height / 2) - parentRect.top, radius: 2 }); });
-            for (let i = 0; i < nodes.length; i++) {
-                const n1 = nodes[i]; topCtx.fillStyle = 'rgba(0, 255, 157, 0.1)'; topCtx.beginPath(); topCtx.arc(n1.x, n1.y, n1.radius + Math.sin(Date.now() * 0.005) * 1.5, 0, Math.PI * 2); topCtx.fill();
-                for (let j = i + 1; j < nodes.length; j++) { const n2 = nodes[j]; const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y); if (dist < 180) { topCtx.beginPath(); topCtx.moveTo(n1.x, n1.y); topCtx.lineTo(n2.x, n2.y); topCtx.stroke(); } }
-            }
+            topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height);
+            topCtx.strokeStyle = 'rgba(0, 212, 255, 0.15)'; topCtx.lineWidth = 1;
+
+            virtNodes.forEach(n => {
+                // 自动漂浮
+                n.x += n.vx; n.y += n.vy;
+                if(n.x < 0 || n.x > topCanvas.width) n.vx *= -1; if(n.y < 0 || n.y > topCanvas.height) n.vy *= -1;
+                
+                // 物理引力计算
+                let dx = cardMouseX - n.x; let dy = cardMouseY - n.y; let dist = Math.hypot(dx, dy);
+                if (dist < 120) {
+                    n.x += dx * 0.02; n.y += dy * 0.02; // 靠向鼠标
+                    topCtx.beginPath(); topCtx.moveTo(n.x, n.y); topCtx.lineTo(cardMouseX, cardMouseY);
+                    topCtx.strokeStyle = `rgba(0, 255, 157, ${1 - dist/120})`; topCtx.stroke(); // 绘制高亮连接线
+                }
+
+                topCtx.fillStyle = 'rgba(0, 212, 255, 0.4)';
+                topCtx.beginPath(); topCtx.arc(n.x, n.y, 2, 0, Math.PI * 2); topCtx.fill();
+
+                // 节点间互相连线
+                virtNodes.forEach(n2 => {
+                    if(Math.hypot(n.x - n2.x, n.y - n2.y) < 80) {
+                        topCtx.beginPath(); topCtx.moveTo(n.x, n.y); topCtx.lineTo(n2.x, n2.y);
+                        topCtx.strokeStyle = 'rgba(0, 212, 255, 0.1)'; topCtx.stroke();
+                    }
+                });
+            });
             requestAnimationFrame(drawTopologyNet);
         }
         window.addEventListener('resize', drawTopologyNet); drawTopologyNet();
 
-        const thoughtChain = [
-            { type: 'thought', text: '> System: 用户查询“如何部署基于 GraphRAG 的多工具智能体”...' },
-            { type: 'thought', text: '> Thought: 需要启动 Multimodal ETL 管道并捞取知识库...' },
-            { type: 'action', text: '> Action: call_GraphDB_retriever(query="GraphRAG Deployment", top_k=5)' },
-            { type: 'observation', text: '> Observation: GraphRAG 召回命中。Parent-Child 分块数据就绪。' },
-            { type: 'thought', text: '> Thought: 检索结果就绪。需要部署 Tool-using 推理逻辑...' },
-            { type: 'thought', text: '> Thought: 智能体推理完毕。后端接口异步发布中...' },
-            { type: 'thought', text: '------------------------------------------------------------' }
-        ];
-        let chainIndex = 0; let charIndex = 0; const consoleEl = document.getElementById('agentConsole');
-        const hitRateValue = document.getElementById('hitRateValue'); const hitRateBar = document.getElementById('hitRateBar'); const latencyValue = document.getElementById('latencyValue'); const latencyBar = document.getElementById('latencyBar');
-        function typeThoughtChain() {
-            if (chainIndex < thoughtChain.length) {
-                const { type, text } = thoughtChain[chainIndex];
-                if (chainIndex === 2 && charIndex === 0) { latencyValue.innerText = '350ms'; latencyValue.style.color = 'var(--warning-color)'; latencyBar.style.width = '80%'; }
-                if (chainIndex === 3 && charIndex === 0) { hitRateValue.innerText = '94%'; hitRateBar.style.width = '94%'; latencyValue.innerText = '120ms'; latencyValue.style.color = 'var(--main-color)'; latencyBar.style.width = '30%'; }
-                if (chainIndex === 6 && charIndex === 0) { hitRateValue.innerText = '92%'; hitRateBar.style.width = '92%'; latencyValue.innerText = '180ms'; latencyBar.style.width = '45%'; }
-                if (charIndex === 0) { const span = document.createElement('span'); span.className = type; span.id = `line-${chainIndex}`; consoleEl.appendChild(span); consoleEl.appendChild(document.createElement('br')); }
-                const currentSpan = document.getElementById(`line-${chainIndex}`);
-                if (charIndex < text.length) { currentSpan.innerHTML += text[charIndex]; charIndex++; setTimeout(typeThoughtChain, 20); }
-                else { charIndex = 0; chainIndex++; setTimeout(typeThoughtChain, 500); consoleEl.scrollTop = consoleEl.scrollHeight; }
-            } else { setTimeout(() => { consoleEl.innerHTML = ''; chainIndex = 0; charIndex = 0; typeThoughtChain(); }, 3000); }
-        }
-        setTimeout(typeThoughtChain, 1500);
 
+        // --- 核心 4：控制台思考链与 RAG 压测联动 ---
+        let baseThoughtChain = [
+            { type: 'thought', text: '> System: Listening for user inputs...' },
+            { type: 'thought', text: '> Health Check: VectorDB synced. Active model Qwen-7B ready.' }
+        ];
+        let consoleEl = document.getElementById('agentConsole');
+        
+        const hitRateValue = document.getElementById('hitRateValue'); const hitRateBar = document.getElementById('hitRateBar'); 
+        const latencyValue = document.getElementById('latencyValue'); const latencyBar = document.getElementById('latencyBar');
+
+        function appendLog(type, text) {
+            const span = document.createElement('span'); span.className = type;
+            span.innerText = text + '\n'; consoleEl.appendChild(span);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function startAgentLog() {
+            appendLog('thought', baseThoughtChain[0].text);
+            setTimeout(() => appendLog('thought', baseThoughtChain[1].text), 1000);
+        }
+
+        // 交互注入压测函数
+        let isTesting = false;
+        function injectPressureTest() {
+            if(isTesting) return; isTesting = true;
+            
+            // 1. 日志打出红色报警
+            appendLog('alert', '\n>>> [INTERVENTION] 触发高并发压力测试！模拟 1000+ 并发 QPS...');
+            appendLog('action', '> Action: dynamic_scale_up(target="VectorDB_Retriever")');
+            
+            // 2. 模拟面板数据飙升劣化 (变红/变黄)
+            hitRateValue.innerText = '74%'; hitRateValue.style.color = 'var(--danger-color)'; hitRateBar.style.width = '74%'; hitRateBar.style.background = 'var(--danger-color)';
+            latencyValue.innerText = '980ms'; latencyValue.style.color = 'var(--danger-color)'; latencyBar.style.width = '95%'; latencyBar.style.background = 'var(--danger-color)';
+            
+            // 3. 动态恢复过程
+            setTimeout(() => {
+                appendLog('observation', '> Observation: 触发降级策略，启动 Redis 缓存层，重新分配 Chunk 计算资源...');
+                hitRateValue.innerText = '85%'; hitRateValue.style.color = 'var(--warning-color)'; hitRateBar.style.width = '85%'; hitRateBar.style.background = 'var(--warning-color)';
+                latencyValue.innerText = '450ms'; latencyValue.style.color = 'var(--warning-color)'; latencyBar.style.width = '60%'; latencyBar.style.background = 'var(--warning-color)';
+            }, 1800);
+
+            // 4. 彻底恢复平稳
+            setTimeout(() => {
+                appendLog('thought', '> Status: 压测结束，系统弹性扩容成功，链路指标恢复绿态。\n--------------------------');
+                hitRateValue.innerText = '94%'; hitRateValue.style.color = 'var(--main-color)'; hitRateBar.style.width = '94%'; hitRateBar.style.background = 'linear-gradient(90deg, var(--accent-color), var(--main-color))';
+                latencyValue.innerText = '160ms'; latencyValue.style.color = 'var(--main-color)'; latencyBar.style.width = '40%'; latencyBar.style.background = 'linear-gradient(90deg, var(--accent-color), var(--main-color))';
+                isTesting = false;
+            }, 3800);
+        }
+
+        // --- 原有路由通道与复制机制 ---
         function smartRedirect() {
             const rawUrl = 'https://github.com/Jiaming-Ren/llm-application-roadmap';
-            document.getElementById('agentConsole').innerHTML += `<span class="action">>>> [CONNECTING] 正在向 GitHub 发起直连握手...</span><br>`;
-            document.getElementById('networkTag').innerHTML = "[CONNECT]";
+            appendLog('action', `\n>>> [CONNECTING] 正在建立与 GitHub 原生骨干网的安全隧道...`);
+            document.getElementById('networkTag').innerHTML = "[CONNECTING...]";
             window.open(rawUrl, '_blank');
             setTimeout(() => { window.location.href = 'https://github-com.translate.goog/Jiaming-Ren/llm-application-roadmap?_x_tr_sl=en&_x_tr_tl=zh-CN'; }, 1500);
         }
+        
         function copyRepo() {
             const el = document.createElement('textarea'); el.value = document.getElementById('repoUrl').innerText; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
             document.getElementById('copyStatus').innerText = "✅ 仓库凭证已安全复制！"; setTimeout(() => { document.getElementById('copyStatus').innerText = ""; }, 2500);
         }
-        window.addEventListener('resize', () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; drawTopologyNet(); });
     </script>
 </body>
 </html>
